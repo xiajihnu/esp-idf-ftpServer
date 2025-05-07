@@ -1121,6 +1121,7 @@ bool ftp_init(void) {
 //============================
 int ftp_run (uint32_t elapsed)
 {
+	int32_t c_sd;
 	//if (xSemaphoreTake(ftp_mutex, FTP_MUTEX_TIMEOUT_MS / portTICK_PERIOD_MS) !=pdTRUE) return -1;
 	if (ftp_stop) return -2;
 
@@ -1138,8 +1139,11 @@ int ftp_run (uint32_t elapsed)
 			}
 			break;
 		case E_FTP_STE_READY:
-			if (ftp_data.c_sd < 0 && ftp_data.substate == E_FTP_STE_SUB_DISCONNECTED) {
-				if (E_FTP_RESULT_OK == ftp_wait_for_connection(ftp_data.lc_sd, &ftp_data.c_sd, &ftp_data.ip_addr)) {
+		    if (ftp_data.substate == E_FTP_STE_SUB_DISCONNECTED)
+			{
+				if (E_FTP_RESULT_OK == ftp_wait_for_connection(ftp_data.lc_sd, &c_sd, &ftp_data.ip_addr)) {
+					_ftp_reset();
+					ftp_data.c_sd = c_sd;
 					ftp_data.txRetries = 0;
 					ftp_data.logginRetries = 0;
 					ftp_data.ctimeout = 0;
